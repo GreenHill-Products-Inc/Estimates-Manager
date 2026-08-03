@@ -236,13 +236,15 @@
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0DOnHom9GUWEUUtJUP-FZ_eVjTfbT1klgCTxcBXNAAErNSLbE1wgF_c103KvCjbuUpw/exec";
 
   // Sheet column headers (adjust if your real headers differ)
+  // These now match the REAL headers on row 5 of "Estimates Log", confirmed
+  // 2026-08-03 from Sebastian's actual header row.
   const COL = {
-    ESTIMATE_NUMBER: 'Estimate Number',
+    ESTIMATE_NUMBER: 'Estimate #',
     DATE: 'Date',
-    CLIENT: 'Client',
+    CLIENT: 'Client / Builder',
     REP: 'Sales Rep',
     STATUS: 'Status',
-    QUOTED: 'Quoted Value',
+    QUOTED: 'Estimate Value',
     FINAL: 'Final Value',
     LOST: 'Value Lost',
     NOTES: 'Notes'
@@ -250,10 +252,12 @@
 
   // Any header NOT in this list is treated as a line item (product) column
   // and shown individually in the detail panel as a selectable, editable row.
+  // Everything except the 13 "<Product> $" columns is meta, per the real header row.
   const META_COLUMNS = [
-    COL.ESTIMATE_NUMBER, COL.DATE, COL.CLIENT, COL.REP, COL.STATUS,
-    COL.QUOTED, COL.FINAL, COL.LOST, COL.NOTES,
-    'Date Requested', 'Address', 'Community', 'Lot / House'
+    'Date', 'Estimate #', 'Week #', 'Client / Builder', 'Subdivision', 'Lot #',
+    'Address', 'City', 'State / ZIP', 'Sales Rep', 'Customer Type', 'Status',
+    'Estimate Value', 'Final Value', 'Value Lost', 'Work Order #', 'Close Date',
+    'Notes', 'Date Requested'
   ];
 
   // Hub URL -- used by the "Back to Hub" link
