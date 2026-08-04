@@ -15,18 +15,26 @@
   *{box-sizing:border-box;}
   body{
     margin:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg); color:var(--dark); display:flex; min-height:100vh;
+    color:var(--dark); display:flex; min-height:100vh; background:#fff;
+  }
+  /* Glass, done right on a plain white page: blur only matters where something sits
+     behind it (the modal overlay). Everything else is a clean, opaque card with a
+     soft shadow and hairline border -- crisp edges, sharp text. */
+  .glass{
+    background:#fff; border:1px solid var(--border);
+    box-shadow:0 4px 16px rgba(20,30,15,.06);
   }
   .sidebar{
-    width:230px; flex-shrink:0; background:var(--sidebar); color:#fff;
+    width:230px; flex-shrink:0; color:#fff; background:var(--sidebar);
     display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh;
   }
-  .logo-chip{ background:#fff; border-radius:8px; padding:10px 12px; display:block; margin-bottom:16px; width:fit-content; }
+  .logo-chip{ background:rgba(255,255,255,.9); border-radius:10px; padding:10px 12px; display:block; margin-bottom:16px; width:fit-content; }
   .logo-chip img{ height:26px; width:auto; display:block; }
   .logo-sub{ font-size:11px; color:#9db08c; margin-bottom:24px; }
   .back-link{
     display:flex; align-items:center; gap:6px; color:#b8c4ac; text-decoration:none; font-size:12px;
-    margin-bottom:22px; padding:8px 10px; border:1px solid rgba(255,255,255,.12); border-radius:8px;
+    margin-bottom:22px; padding:8px 10px; border:1px solid rgba(255,255,255,.12); border-radius:10px;
+    transition:color .15s ease, border-color .15s ease;
   }
   .back-link:hover{ color:#fff; border-color:rgba(255,255,255,.3); }
   .status-pill{ font-size:11px; color:#9db08c; padding:8px 10px; }
@@ -37,7 +45,12 @@
 
   /* Scorecards */
   .scorecards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
-  .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+  .card{
+    background:#fff; border:1px solid var(--border); border-radius:18px; padding:18px 20px;
+    box-shadow:0 2px 10px rgba(20,30,15,.05);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{ transform:translateY(-2px); box-shadow:0 12px 28px rgba(20,30,15,.12); }
   .card .label{ font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:var(--mid); margin-bottom:6px; }
   .card .value{ font-size:22px; font-weight:700; color:var(--dark); }
   .card.approved .value{ color:var(--deep-green); }
@@ -46,26 +59,38 @@
 
   .toolbar{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; align-items:center; }
   .toolbar input, .toolbar select{
-    border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:13px; font-family:inherit;
-    background:#fff; color:var(--dark);
+    border:1px solid var(--border); border-radius:12px; padding:9px 12px; font-size:13px; font-family:inherit;
+    background:#fff; color:var(--dark); transition:border-color .15s ease, box-shadow .15s ease;
   }
+  .toolbar input:focus, .toolbar select:focus{ outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(118,188,33,.15); }
   .toolbar input[type=text]{ flex:1; min-width:220px; }
   .btn{
-    border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer;
-    background:var(--green); color:#fff;
+    border:none; border-radius:20px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer;
+    background:linear-gradient(180deg, rgba(140,205,50,.95), rgba(90,154,24,.95)); color:#fff;
+    box-shadow:0 4px 14px rgba(90,154,24,.35), inset 0 1px 0 rgba(255,255,255,.35);
+    transition:background .15s ease, transform .1s ease, box-shadow .15s ease;
   }
-  .btn:hover{ background:var(--deep-green); }
-  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--charcoal); }
+  .btn:hover{ box-shadow:0 6px 18px rgba(90,154,24,.45), inset 0 1px 0 rgba(255,255,255,.4); }
+  .btn:active{ transform:scale(.97); }
+  .btn.ghost{
+    background:#fff; border:1px solid var(--border); color:var(--charcoal); box-shadow:none;
+  }
+  .btn.ghost:hover{ background:var(--bg); }
 
-  .view-toggle{ display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-  .view-toggle button{
-    border:none; background:#fff; color:var(--charcoal); padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer;
+  .view-toggle{
+    display:flex; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff;
   }
-  .view-toggle button.active{ background:var(--green); color:#fff; }
+  .view-toggle button{
+    border:none; background:transparent; color:var(--charcoal); padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer;
+    transition:background .15s ease;
+  }
+  .view-toggle button.active{ background:linear-gradient(180deg, rgba(140,205,50,.95), rgba(90,154,24,.95)); color:#fff; }
 
   /* Kanban board */
   .board{ display:grid; grid-template-columns:repeat(3, minmax(260px, 1fr)); gap:16px; align-items:start; }
-  .board-col{ background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px; min-height:120px; }
+  .board-col{
+    background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:12px; min-height:120px;
+  }
   .board-col.drag-over{ outline:2px dashed var(--light); outline-offset:-2px; }
   .board-col-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:0 4px; }
   .board-col-head h3{ font-size:12.5px; text-transform:uppercase; letter-spacing:.3px; margin:0; }
@@ -76,9 +101,11 @@
   .board-col-total{ font-size:11px; color:var(--mid); margin:-6px 4px 10px; }
 
   .board-card{
-    background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px;
-    cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px;
+    cursor:grab; box-shadow:0 1px 3px rgba(20,30,15,.06);
+    transition:transform .15s ease, box-shadow .15s ease;
   }
+  .board-card:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(20,30,15,.12); }
   .board-card:active{ cursor:grabbing; }
   .board-card.dragging{ opacity:.4; }
   .board-card .bc-top{ display:flex; justify-content:space-between; align-items:start; gap:8px; margin-bottom:6px; }
@@ -88,14 +115,18 @@
   .board-card .bc-rep{ font-size:11px; color:var(--mid); }
   .board-empty{ font-size:11.5px; color:var(--mid); text-align:center; padding:16px 6px; }
 
-  table{ width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+  table{
+    width:100%; border-collapse:collapse; background:#fff;
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    box-shadow:0 2px 10px rgba(20,30,15,.05);
+  }
   thead th{
     text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--mid);
     background:var(--bg); padding:10px 14px; border-bottom:1px solid var(--border); position:sticky; top:0;
   }
-  tbody td{ padding:11px 14px; font-size:13px; border-bottom:1px solid var(--border); }
-  tbody tr{ cursor:pointer; }
-  tbody tr:hover{ background:var(--mint); }
+  tbody td{ padding:11px 14px; font-size:13px; border-bottom:1px solid rgba(221,232,216,.6); }
+  tbody tr{ cursor:pointer; transition:background .12s ease; }
+  tbody tr:hover{ background:rgba(168,216,90,.18); }
   tbody tr td:first-child{ border-left:3px solid transparent; }
   tbody tr.row-approved td:first-child{ border-left-color:var(--deep-green); }
   tbody tr.row-lost td:first-child{ border-left-color:var(--red); }
@@ -108,26 +139,43 @@
 
   .empty-state{ text-align:center; padding:60px 20px; color:var(--mid); font-size:13.5px; }
 
-  /* Edit panel */
-  .overlay{ display:none; position:fixed; inset:0; background:rgba(26,35,24,.45); z-index:50; }
-  .overlay.open{ display:block; }
-  .panel{
-    position:fixed; top:0; right:0; height:100vh; width:420px; max-width:94vw; background:#fff;
-    box-shadow:-10px 0 30px rgba(0,0,0,.15); z-index:60; transform:translateX(100%);
-    transition:transform .2s ease; padding:26px; overflow-y:auto;
+  /* Edit modal -- centered popup with blurred backdrop */
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(20,28,18,.5); backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px); z-index:50; opacity:0; transition:opacity .22s ease;
   }
-  .panel.open{ transform:translateX(0); }
-  .panel h2{ font-size:17px; margin:0 0 4px; }
+  .overlay.open{ display:block; opacity:1; }
+  .panel{
+    position:fixed; top:50%; left:50%; width:600px; max-width:92vw; max-height:86vh;
+    background:#fff; border:1px solid var(--border);
+    border-radius:24px; box-shadow:0 30px 70px rgba(10,15,8,.25); z-index:60;
+    transform:translate(-50%,-48%) scale(.96); opacity:0; pointer-events:none;
+    transition:transform .25s cubic-bezier(.16,.9,.3,1), opacity .18s ease;
+    padding:32px 34px; overflow-y:auto;
+  }
+  .panel.open{ transform:translate(-50%,-50%) scale(1); opacity:1; pointer-events:auto; }
+  .panel-close{
+    position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--border); background:var(--bg); color:var(--charcoal); font-size:16px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .15s ease;
+  }
+  .panel-close:hover{ background:var(--border); }
+  .panel h2{ font-size:19px; margin:0 0 4px; padding-right:36px; }
   .panel .est-sub{ font-size:12.5px; color:var(--mid); margin:0 0 20px; }
   .field{ margin-bottom:16px; }
   .field label{ display:block; font-size:11.5px; font-weight:600; color:var(--charcoal); margin-bottom:6px; }
   .field input, .field select, .field textarea{
-    width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit;
+    width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:13px; font-family:inherit;
+    background:#fff; transition:border-color .15s ease, box-shadow .15s ease;
   }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(118,188,33,.15); }
   .field textarea{ min-height:80px; resize:vertical; }
-  .readonly-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; margin-bottom:20px; }
+  .readonly-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:20px;
+    background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:16px 18px;
+  }
   .readonly-grid div{ font-size:12px; }
-  .readonly-grid .k{ color:var(--mid); }
+  .readonly-grid .k{ color:var(--mid); margin-bottom:2px; }
   .readonly-grid .v{ font-weight:600; }
 
   /* Line items — visual, selectable */
@@ -135,8 +183,9 @@
   .line-items-head h3{ font-size:13px; margin:0; text-transform:uppercase; letter-spacing:.3px; color:var(--charcoal); }
   .line-items-head .hint{ font-size:11px; color:var(--mid); }
   .line-item{
-    display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:10px;
+    display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:12px;
     padding:9px 12px; margin-bottom:8px; background:var(--bg);
+    transition:border-color .15s ease, background .15s ease;
   }
   .line-item.selected{ border-color:var(--light); background:var(--mint); }
   .line-item input[type=checkbox]{ width:16px; height:16px; accent-color:var(--green); flex-shrink:0; }
@@ -193,6 +242,7 @@
 
 <div class="overlay" id="overlay"></div>
 <div class="panel" id="editPanel">
+  <button class="panel-close" id="panelCloseBtn" aria-label="Close">✕</button>
   <h2 id="panelTitle">Estimate</h2>
   <p class="est-sub" id="panelSub">—</p>
 
@@ -235,6 +285,13 @@
   // Deploy that file as its own Web App and paste the resulting /exec URL here.
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0DOnHom9GUWEUUtJUP-FZ_eVjTfbT1klgCTxcBXNAAErNSLbE1wgF_c103KvCjbuUpw/exec";
 
+  // Shared secret required by the Apps Script backend on every request (see
+  // SHARED_SECRET in apps-script-additions-ALL.gs). Must match EXACTLY --
+  // if you ever rotate the secret in the script, update it here too and
+  // republish both, otherwise every request from this page starts failing
+  // with "Unauthorized."
+  const APPS_SCRIPT_KEY = "fVkO0CgIYkFrHHGLSyHQwdGMkfASJL3l3MFa_cY_MCE";
+
   // Sheet column headers (adjust if your real headers differ)
   // These now match the REAL headers on row 5 of "Estimates Log", confirmed
   // 2026-08-03 from Sebastian's actual header row.
@@ -247,7 +304,17 @@
     QUOTED: 'Estimate Value',
     FINAL: 'Final Value',
     LOST: 'Value Lost',
-    NOTES: 'Notes'
+    NOTES: 'Notes',
+    WEEK: 'Week #',
+    SUBDIVISION: 'Subdivision',
+    LOT: 'Lot #',
+    ADDRESS: 'Address',
+    CITY: 'City',
+    STATE_ZIP: 'State / ZIP',
+    CUSTOMER_TYPE: 'Customer Type',
+    WORK_ORDER: 'Work Order #',
+    CLOSE_DATE: 'Close Date',
+    DATE_REQUESTED: 'Date Requested'
   };
 
   // Any header NOT in this list is treated as a line item (product) column
@@ -302,7 +369,7 @@
     }
 
     try{
-      const res = await fetch(APPS_SCRIPT_URL + '?action=list');
+      const res = await fetch(APPS_SCRIPT_URL + '?action=list&key=' + encodeURIComponent(APPS_SCRIPT_KEY));
       const data = await res.json();
       if (!data.ok){ throw new Error(data.error || 'Unknown error'); }
       allRows = data.rows || [];
@@ -484,7 +551,7 @@
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'update', row: rowNum, fields: { status: newStatus } })
+        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, row: rowNum, fields: { status: newStatus } })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Could not update status');
@@ -538,11 +605,22 @@
     const v = found.values;
 
     document.getElementById('panelTitle').textContent = v[COL.ESTIMATE_NUMBER] || ('Row ' + rowNum);
-    document.getElementById('panelSub').textContent = (v[COL.CLIENT] || '') + ' · ' + (v[COL.REP] || '');
+    document.getElementById('panelSub').textContent =
+      (v[COL.CLIENT] || '') + ' · ' + (v[COL.REP] || '') + (v[COL.SUBDIVISION] ? ' · ' + v[COL.SUBDIVISION] : '');
+
+    const addressLine = [v[COL.ADDRESS], v[COL.CITY], v[COL.STATE_ZIP]].filter(Boolean).join(', ') || '—';
 
     document.getElementById('readonlyGrid').innerHTML = `
       <div><div class="k">Date</div><div class="v">${v[COL.DATE] || '—'}</div></div>
+      <div><div class="k">Date Requested</div><div class="v">${v[COL.DATE_REQUESTED] || '—'}</div></div>
+      <div style="grid-column:1 / -1;"><div class="k">Address</div><div class="v">${addressLine}</div></div>
+      <div><div class="k">Subdivision</div><div class="v">${v[COL.SUBDIVISION] || '—'}</div></div>
+      <div><div class="k">Lot #</div><div class="v">${v[COL.LOT] || '—'}</div></div>
+      <div><div class="k">Customer Type</div><div class="v">${v[COL.CUSTOMER_TYPE] || '—'}</div></div>
+      <div><div class="k">Week #</div><div class="v">${v[COL.WEEK] || '—'}</div></div>
       <div><div class="k">Quoted</div><div class="v">${fmtMoney(v[COL.QUOTED])}</div></div>
+      <div><div class="k">Work Order #</div><div class="v">${v[COL.WORK_ORDER] || '—'}</div></div>
+      <div><div class="k">Close Date</div><div class="v">${v[COL.CLOSE_DATE] || '—'}</div></div>
     `;
 
     document.getElementById('fStatus').value = v[COL.STATUS] || '';
@@ -584,7 +662,7 @@
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight
-        body: JSON.stringify({ action: 'update', row: activeRow.row, fields: fields })
+        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, row: activeRow.row, fields: fields })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Save failed');
@@ -606,6 +684,8 @@
   }
 
   document.getElementById('overlay').addEventListener('click', closePanel);
+  document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closePanel(); });
   document.getElementById('cancelBtn').addEventListener('click', closePanel);
   document.getElementById('saveBtn').addEventListener('click', saveChanges);
   document.getElementById('refreshBtn').addEventListener('click', loadEstimates);
@@ -613,6 +693,16 @@
   document.getElementById('statusFilter').addEventListener('change', renderActiveView);
   document.getElementById('boardViewBtn').addEventListener('click', () => setView('board'));
   document.getElementById('tableViewBtn').addEventListener('click', () => setView('table'));
+
+  // Deep-link support -- the Hub's "Estimates pending" stat card opens this
+  // page with ?status=pending so it lands pre-filtered instead of just open.
+  (function applyStatusFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    if (!status) return;
+    const select = document.getElementById('statusFilter');
+    if ([...select.options].some(o => o.value === status)) select.value = status;
+  })();
 
   loadEstimates();
 </script>
