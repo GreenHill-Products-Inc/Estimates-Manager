@@ -17,6 +17,26 @@
     margin:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--dark); display:flex; min-height:100vh; background:#fff;
   }
+
+  /* ---------- MOTION -- same entrance/feedback language as the Hub and
+     Pending Tasks, so the three tools feel consistent. ---------- */
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(14px) scale(.98); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes rowIn{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes railIn{
+    from{ opacity:0; transform:translateX(-14px); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  @keyframes dropPulse{
+    0%{ box-shadow:0 0 0 0 rgba(118,188,33,.5); } 100%{ box-shadow:0 0 0 10px rgba(118,188,33,0); }
+  }
+  .board-card.just-dropped{ animation:dropPulse .8s ease-out; }
+  .btn:active, .view-toggle button:active, .panel-close:active, .back-link:active{ transform:scale(.95); }
   /* Glass, done right on a plain white page: blur only matters where something sits
      behind it (the modal overlay). Everything else is a clean, opaque card with a
      soft shadow and hairline border -- crisp edges, sharp text. */
@@ -34,9 +54,11 @@
   .back-link{
     display:flex; align-items:center; gap:6px; color:#b8c4ac; text-decoration:none; font-size:12px;
     margin-bottom:22px; padding:8px 10px; border:1px solid rgba(255,255,255,.12); border-radius:10px;
-    transition:color .15s ease, border-color .15s ease;
+    transition:color .15s ease, border-color .15s ease, transform .15s ease;
   }
-  .back-link:hover{ color:#fff; border-color:rgba(255,255,255,.3); }
+  .back-link:hover{ color:#fff; border-color:rgba(255,255,255,.3); transform:translateX(-2px); }
+  .logo-chip{ animation:railIn .5s cubic-bezier(.16,1,.3,1) both; }
+  .back-link{ animation:railIn .5s cubic-bezier(.16,1,.3,1) .08s both; }
   .status-pill{ font-size:11px; color:#9db08c; padding:8px 10px; }
 
   .main{ flex:1; padding:32px 36px; overflow-x:auto; }
@@ -48,9 +70,10 @@
   .card{
     background:#fff; border:1px solid var(--border); border-radius:18px; padding:18px 20px;
     box-shadow:0 2px 10px rgba(20,30,15,.05);
-    transition:transform .15s ease, box-shadow .15s ease;
+    transition:transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s ease;
+    animation:cardIn .5s cubic-bezier(.16,1,.3,1) both;
   }
-  .card:hover{ transform:translateY(-2px); box-shadow:0 12px 28px rgba(20,30,15,.12); }
+  .card:hover{ transform:translateY(-4px) scale(1.015); box-shadow:0 16px 32px rgba(20,30,15,.14); }
   .card .label{ font-size:11px; text-transform:uppercase; letter-spacing:.3px; color:var(--mid); margin-bottom:6px; }
   .card .value{ font-size:22px; font-weight:700; color:var(--dark); }
   .card.approved .value{ color:var(--deep-green); }
@@ -87,7 +110,7 @@
   .view-toggle button.active{ background:linear-gradient(180deg, rgba(140,205,50,.95), rgba(90,154,24,.95)); color:#fff; }
 
   /* Kanban board */
-  .board{ display:grid; grid-template-columns:repeat(3, minmax(260px, 1fr)); gap:16px; align-items:start; }
+  .board{ display:grid; grid-template-columns:repeat(4, minmax(230px, 1fr)); gap:16px; align-items:start; }
   .board-col{
     background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:12px; min-height:120px;
   }
@@ -98,14 +121,16 @@
   .board-col.pending .board-col-head h3{ color:var(--amber); }
   .board-col.approved .board-col-head h3{ color:var(--deep-green); }
   .board-col.lost .board-col-head h3{ color:var(--red); }
+  .board-col.other .board-col-head h3{ color:var(--mid); }
   .board-col-total{ font-size:11px; color:var(--mid); margin:-6px 4px 10px; }
 
   .board-card{
     background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px;
     cursor:grab; box-shadow:0 1px 3px rgba(20,30,15,.06);
-    transition:transform .15s ease, box-shadow .15s ease;
+    transition:transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
+    animation:cardIn .35s cubic-bezier(.16,1,.3,1) both;
   }
-  .board-card:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(20,30,15,.12); }
+  .board-card:hover{ transform:translateY(-3px) scale(1.015); box-shadow:0 10px 22px rgba(20,30,15,.12); }
   .board-card:active{ cursor:grabbing; }
   .board-card.dragging{ opacity:.4; }
   .board-card .bc-top{ display:flex; justify-content:space-between; align-items:start; gap:8px; margin-bottom:6px; }
@@ -125,17 +150,19 @@
     background:var(--bg); padding:10px 14px; border-bottom:1px solid var(--border); position:sticky; top:0;
   }
   tbody td{ padding:11px 14px; font-size:13px; border-bottom:1px solid rgba(221,232,216,.6); }
-  tbody tr{ cursor:pointer; transition:background .12s ease; }
-  tbody tr:hover{ background:rgba(168,216,90,.18); }
+  tbody tr{ cursor:pointer; transition:background .12s ease, transform .12s ease; animation:rowIn .3s cubic-bezier(.16,1,.3,1) both; }
+  tbody tr:hover{ background:rgba(168,216,90,.18); transform:translateX(2px); }
   tbody tr td:first-child{ border-left:3px solid transparent; }
   tbody tr.row-approved td:first-child{ border-left-color:var(--deep-green); }
   tbody tr.row-lost td:first-child{ border-left-color:var(--red); }
   tbody tr.row-pending td:first-child{ border-left-color:var(--amber); }
+  tbody tr.row-other td:first-child{ border-left-color:var(--border); }
 
   .badge{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; display:inline-block; }
   .badge.approved{ background:var(--mint); color:var(--deep-green); }
   .badge.lost{ background:var(--red-bg); color:var(--red); }
   .badge.pending{ background:var(--amber-bg); color:var(--amber); }
+  .badge.other{ background:var(--bg); color:var(--mid); border:1px solid var(--border); }
 
   .empty-state{ text-align:center; padding:60px 20px; color:var(--mid); font-size:13.5px; }
 
@@ -227,7 +254,8 @@
       <option value="">All statuses</option>
       <option value="Approved">Approved</option>
       <option value="Lost">Lost</option>
-      <option value="pending">Pending (no status)</option>
+      <option value="Estimate Sent">Pending (Estimate Sent)</option>
+      <option value="other">Other / No status</option>
     </select>
     <button class="btn ghost" id="refreshBtn">↻ Refresh</button>
     <div class="view-toggle">
@@ -330,6 +358,20 @@
   // Hub URL -- used by the "Back to Hub" link
   const HUB_URL = "https://greenhill-products-inc.github.io/GreenHill-Hub/";
 
+  // Real per-user session, not just the shared secret -- see em_listEstimates/
+  // em_updateEstimate in apps-script-additions-ALL.gs. This page has no login
+  // screen of its own; it only works when opened via the Hub's tool card,
+  // which appends ?sessionToken= for any tool it's already signed you into
+  // (see SSO_TOOLS in hub-index-v2.html). Opening this URL directly, or with
+  // an expired/invalid token, now shows a clear "open this from the Hub"
+  // message instead of a confusing generic connection error.
+  const SESSION_TOKEN = new URLSearchParams(window.location.search).get('sessionToken') || '';
+
+  function noSessionMessageHtml(){
+    return '<div class="empty-state">You need to open Estimates Manager from the Hub to see your session.<br>' +
+      '<a href="' + HUB_URL + '" style="color:var(--deep-green);font-weight:700;">← Go to the Hub and sign in</a></div>';
+  }
+
   let allRows = [];
   let allHeaders = [];
   let activeRow = null;
@@ -344,17 +386,24 @@
     return n.toLocaleString('en-US', { style:'currency', currency:'USD' });
   }
 
+  // "Pending" means the literal Status "Estimate Sent" -- awaiting a reply --
+  // not "anything that isn't Approved/Lost" (that was the old behavior; it
+  // silently lumped truly-blank/Draft rows in with real pending estimates).
+  // Anything else falls into "other" so it still shows up somewhere instead
+  // of quietly disappearing from the board. Keep this in sync with em_summary
+  // in apps-script-additions-ALL.gs if the bucket rules ever change.
   function statusKey(status){
     const s = String(status || '').trim().toLowerCase();
     if (s === 'approved') return 'approved';
     if (s === 'lost') return 'lost';
-    return 'pending';
+    if (s === 'estimate sent') return 'pending';
+    return 'other';
   }
 
   function statusBadge(status){
     const key = statusKey(status);
-    const label = key === 'pending' ? 'Pending' : (key.charAt(0).toUpperCase() + key.slice(1));
-    return '<span class="badge ' + key + '">' + label + '</span>';
+    const labels = { approved: 'Approved', lost: 'Lost', pending: 'Estimate Sent', other: (status || 'No status') };
+    return '<span class="badge ' + key + '">' + labels[key] + '</span>';
   }
 
   async function loadEstimates(){
@@ -368,8 +417,15 @@
       return;
     }
 
+    if (!SESSION_TOKEN){
+      document.getElementById('connStatus').textContent = 'Not signed in';
+      document.getElementById('tableWrap').innerHTML = noSessionMessageHtml();
+      return;
+    }
+
     try{
-      const res = await fetch(APPS_SCRIPT_URL + '?action=list&key=' + encodeURIComponent(APPS_SCRIPT_KEY));
+      const res = await fetch(APPS_SCRIPT_URL + '?action=list&key=' + encodeURIComponent(APPS_SCRIPT_KEY) +
+        '&sessionToken=' + encodeURIComponent(SESSION_TOKEN));
       const data = await res.json();
       if (!data.ok){ throw new Error(data.error || 'Unknown error'); }
       allRows = data.rows || [];
@@ -378,31 +434,34 @@
       renderScorecards();
       renderActiveView();
     }catch(err){
-      document.getElementById('connStatus').textContent = 'Not connected';
-      document.getElementById('tableWrap').innerHTML =
-        '<div class="empty-state">Could not connect to the Sheet.<br>Check that you added the functions from <code>estimates-manager-apps-script.gs</code> and created a new deployment.<br><small>' +
-        (err.message || '') + '</small></div>';
+      const expired = /session expired|sign in again/i.test(err.message || '');
+      document.getElementById('connStatus').textContent = expired ? 'Not signed in' : 'Not connected';
+      document.getElementById('tableWrap').innerHTML = expired
+        ? noSessionMessageHtml()
+        : '<div class="empty-state">Could not connect to the Sheet.<br>Check that you added the functions from <code>estimates-manager-apps-script.gs</code> and created a new deployment.<br><small>' +
+          (err.message || '') + '</small></div>';
     }
   }
 
   function renderScorecards(){
-    let approvedTotal = 0, lostTotal = 0, pendingCount = 0, approvedCount = 0, lostCount = 0;
+    let approvedTotal = 0, lostTotal = 0, pendingCount = 0, otherCount = 0, approvedCount = 0, lostCount = 0;
     allRows.forEach(r => {
       const v = r.values;
       const key = statusKey(v[COL.STATUS]);
       if (key === 'approved'){ approvedTotal += Number(v[COL.FINAL]) || 0; approvedCount++; }
       else if (key === 'lost'){ lostTotal += Number(v[COL.LOST]) || 0; lostCount++; }
-      else pendingCount++;
+      else if (key === 'pending') pendingCount++;
+      else otherCount++;
     });
     const decided = approvedCount + lostCount;
     const winRate = decided ? Math.round((approvedCount / decided) * 100) : 0;
 
     document.getElementById('scorecards').innerHTML = `
-      <div class="card"><div class="label">Total Estimates</div><div class="value">${allRows.length}</div></div>
-      <div class="card approved"><div class="label">Approved Value</div><div class="value">${fmtMoney(approvedTotal)}</div></div>
-      <div class="card pending"><div class="label">Pending</div><div class="value">${pendingCount}</div></div>
-      <div class="card lost"><div class="label">Lost Value</div><div class="value">${fmtMoney(lostTotal)}</div></div>
-      <div class="card"><div class="label">Win Rate</div><div class="value">${winRate}%</div></div>
+      <div class="card" style="animation-delay:0ms"><div class="label">Total Estimates</div><div class="value">${allRows.length}</div></div>
+      <div class="card approved" style="animation-delay:60ms"><div class="label">Approved Value</div><div class="value">${fmtMoney(approvedTotal)}</div></div>
+      <div class="card pending" style="animation-delay:120ms"><div class="label">Pending (Estimate Sent)</div><div class="value">${pendingCount}</div></div>
+      <div class="card lost" style="animation-delay:180ms"><div class="label">Lost Value</div><div class="value">${fmtMoney(lostTotal)}</div></div>
+      <div class="card" style="animation-delay:240ms"><div class="label">Win Rate</div><div class="value">${winRate}%</div></div>
     `;
   }
 
@@ -434,9 +493,9 @@
       '<th>Estimate</th><th>Date</th><th>Client</th><th>Rep</th><th>Status</th>' +
       '<th>Quoted</th><th>Final</th><th>Value Lost</th>' +
       '</tr></thead><tbody>';
-    rows.forEach(r => {
+    rows.forEach((r, i) => {
       const v = r.values;
-      html += `<tr class="row-${statusKey(v[COL.STATUS])}" data-row="${r.row}">
+      html += `<tr class="row-${statusKey(v[COL.STATUS])}" data-row="${r.row}" style="animation-delay:${Math.min(i, 20) * 20}ms">
         <td>${v[COL.ESTIMATE_NUMBER] || '—'}</td>
         <td>${v[COL.DATE] || '—'}</td>
         <td>${v[COL.CLIENT] || '—'}</td>
@@ -475,7 +534,8 @@
   }
 
   const BOARD_COLUMNS = [
-    { key: 'pending', label: 'Pending', statusValue: '' },
+    { key: 'other', label: 'Other / No status', statusValue: '' },
+    { key: 'pending', label: 'Pending (Estimate Sent)', statusValue: 'Estimate Sent' },
     { key: 'approved', label: 'Approved', statusValue: 'Approved' },
     { key: 'lost', label: 'Lost', statusValue: 'Lost' }
   ];
@@ -509,10 +569,11 @@
         colEl.appendChild(empty);
       }
 
-      colRows.forEach(r => {
+      colRows.forEach((r, i) => {
         const v = r.values;
         const card = document.createElement('div');
         card.className = 'board-card';
+        card.style.animationDelay = (Math.min(i, 15) * 30) + 'ms';
         card.setAttribute('draggable', 'true');
         card.setAttribute('data-row', r.row);
         card.innerHTML = `
@@ -551,7 +612,7 @@
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, row: rowNum, fields: { status: newStatus } })
+        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, sessionToken: SESSION_TOKEN, row: rowNum, fields: { status: newStatus } })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Could not update status');
@@ -662,7 +723,7 @@
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight
-        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, row: activeRow.row, fields: fields })
+        body: JSON.stringify({ action: 'update', key: APPS_SCRIPT_KEY, sessionToken: SESSION_TOKEN, row: activeRow.row, fields: fields })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Save failed');
