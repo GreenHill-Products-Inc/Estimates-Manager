@@ -205,22 +205,45 @@
   .readonly-grid .k{ color:var(--mid); margin-bottom:2px; }
   .readonly-grid .v{ font-weight:600; }
 
-  /* Line items — visual, selectable */
-  .line-items-head{ display:flex; align-items:center; justify-content:space-between; margin:22px 0 10px; }
+  /* Line items — visual, chip-style, selectable */
+  .line-items-head{ display:flex; align-items:center; justify-content:space-between; margin:22px 0 10px; flex-wrap:wrap; gap:6px; }
   .line-items-head h3{ font-size:13px; margin:0; text-transform:uppercase; letter-spacing:.3px; color:var(--charcoal); }
   .line-items-head .hint{ font-size:11px; color:var(--mid); }
-  .line-item{
-    display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:12px;
-    padding:9px 12px; margin-bottom:8px; background:var(--bg);
-    transition:border-color .15s ease, background .15s ease;
+  .line-items-head .li-summary{
+    font-size:11.5px; font-weight:700; color:var(--deep-green); background:var(--mint);
+    border-radius:20px; padding:4px 11px; transition:opacity .15s ease;
   }
-  .line-item.selected{ border-color:var(--light); background:var(--mint); }
-  .line-item input[type=checkbox]{ width:16px; height:16px; accent-color:var(--green); flex-shrink:0; }
-  .line-item .li-name{ flex:1; font-size:12.5px; font-weight:600; }
-  .line-item input[type=number]{
-    width:110px; border:1px solid var(--border); border-radius:6px; padding:6px 8px; font-size:12.5px; font-family:inherit;
+  .line-items-head .li-summary.empty{ color:var(--mid); background:var(--bg); }
+
+  .line-items-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(148px,1fr)); gap:10px; }
+  .li-chip{
+    position:relative; border:1.5px solid var(--border); border-radius:14px; padding:11px 12px;
+    background:#fff; cursor:pointer; transition:transform .18s cubic-bezier(.16,1,.3,1), box-shadow .18s ease, border-color .15s ease, background .15s ease;
+    display:flex; flex-direction:column; gap:8px; animation:cardIn .3s cubic-bezier(.16,1,.3,1) both;
   }
-  .line-item input[type=number]:disabled{ background:#f2f2f0; color:var(--mid); }
+  .li-chip:hover{ transform:translateY(-2px); box-shadow:0 8px 18px rgba(20,30,15,.10); border-color:var(--light); }
+  .li-chip.selected{ background:var(--mint); border-color:var(--green); box-shadow:0 4px 14px rgba(118,188,33,.16); }
+  .li-chip-top{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .li-icon{
+    width:26px; height:26px; border-radius:9px; background:var(--bg); color:var(--mid);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800;
+    flex-shrink:0; transition:background .15s ease, color .15s ease;
+  }
+  .li-chip.selected .li-icon{ background:var(--accent, var(--green)); color:#fff; }
+  .li-check-badge{
+    width:18px; height:18px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .li-chip.selected .li-check-badge{ background:var(--green); border-color:var(--green); color:#fff; }
+  .li-chip-name{ font-size:12px; font-weight:700; color:var(--charcoal); line-height:1.25; }
+  .li-chip-value{ display:none; }
+  .li-chip.selected .li-chip-value{ display:block; }
+  .li-chip input[type=number]{
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:6px 8px; font-size:12.5px; font-family:inherit;
+    background:#fff; transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .li-chip input[type=number]:focus{ outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(118,188,33,.15); }
 
   .panel-actions{ display:flex; gap:10px; margin-top:16px; }
   .save-msg{ font-size:12px; margin-top:10px; display:none; }
@@ -285,6 +308,11 @@
     </select>
   </div>
   <div class="field">
+    <label>Estimate Value (quoted total)</label>
+    <input type="number" step="0.01" id="fQuotedValue" placeholder="0.00">
+    <div style="font-size:11px;color:var(--mid);margin-top:5px;">Use this when the job doesn't break down into the product line items below (e.g. custom / "Other" work).</div>
+  </div>
+  <div class="field">
     <label>Final Value (what the client actually paid)</label>
     <input type="number" step="0.01" id="fFinalValue" placeholder="0.00">
   </div>
@@ -295,9 +323,10 @@
 
   <div class="line-items-head">
     <h3>Line Items</h3>
-    <span class="hint">Select each product to edit its value</span>
+    <span class="li-summary empty" id="liSummary">No items selected</span>
   </div>
-  <div id="lineItemsWrap"></div>
+  <p class="hint" style="margin:-4px 0 10px;">Tap a product to select it and enter its value.</p>
+  <div class="line-items-grid" id="lineItemsWrap"></div>
 
   <div class="panel-actions">
     <button class="btn" id="saveBtn">Save changes</button>
@@ -642,6 +671,38 @@
     return allHeaders.filter(h => h && META_COLUMNS.indexOf(h) === -1);
   }
 
+  // Small, deterministic accent color per product so the chip grid reads as
+  // colorful/scannable without needing real per-product artwork.
+  const CHIP_PALETTE = ['#76BC21', '#5A9A18', '#3D8B52', '#8FBF3F', '#4F8F6E', '#6BAF3A', '#3F7A5E', '#89B34C'];
+  function chipColor(name){
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return CHIP_PALETTE[hash % CHIP_PALETTE.length];
+  }
+  function chipInitials(name){
+    const words = name.replace(/\$/g, '').trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return '?';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  function updateLineItemsSummary(){
+    const summary = document.getElementById('liSummary');
+    if (!summary) return;
+    let count = 0, total = 0;
+    document.querySelectorAll('#lineItemsWrap .li-chip.selected').forEach(chip => {
+      count++;
+      total += Number(chip.querySelector('.li-value').value) || 0;
+    });
+    if (!count){
+      summary.textContent = 'No items selected';
+      summary.classList.add('empty');
+    } else {
+      summary.textContent = count + (count === 1 ? ' item · ' : ' items · ') + fmtMoney(total);
+      summary.classList.remove('empty');
+    }
+  }
+
   function renderLineItems(values){
     const cols = lineItemColumns();
     const wrap = document.getElementById('lineItemsWrap');
@@ -652,24 +713,47 @@
     wrap.innerHTML = cols.map(colName => {
       const raw = values[colName];
       const hasValue = raw !== '' && raw !== null && raw !== undefined && Number(raw) !== 0;
+      const color = chipColor(colName);
       return `
-        <div class="line-item ${hasValue ? 'selected' : ''}" data-col="${colName}">
-          <input type="checkbox" class="li-check" ${hasValue ? 'checked' : ''}>
-          <span class="li-name">${colName}</span>
-          <input type="number" step="0.01" class="li-value" value="${hasValue ? raw : ''}" ${hasValue ? '' : 'disabled'}>
+        <div class="li-chip ${hasValue ? 'selected' : ''}" data-col="${colName}" style="--accent:${color};">
+          <div class="li-chip-top">
+            <div class="li-icon">${chipInitials(colName)}</div>
+            <div class="li-check-badge">✓</div>
+          </div>
+          <div class="li-chip-name">${colName}</div>
+          <div class="li-chip-value">
+            <input type="number" step="0.01" class="li-value" value="${hasValue ? raw : ''}" placeholder="0.00">
+          </div>
         </div>
       `;
     }).join('');
 
-    wrap.querySelectorAll('.line-item').forEach(row => {
-      const checkbox = row.querySelector('.li-check');
-      const valueInput = row.querySelector('.li-value');
-      checkbox.addEventListener('change', () => {
-        row.classList.toggle('selected', checkbox.checked);
-        valueInput.disabled = !checkbox.checked;
-        if (!checkbox.checked) valueInput.value = '';
+    wrap.querySelectorAll('.li-chip').forEach(chip => {
+      const valueInput = chip.querySelector('.li-value');
+
+      function select(){
+        if (chip.classList.contains('selected')) return;
+        chip.classList.add('selected');
+        setTimeout(() => valueInput.focus(), 0);
+        updateLineItemsSummary();
+      }
+      function deselect(){
+        chip.classList.remove('selected');
+        valueInput.value = '';
+        updateLineItemsSummary();
+      }
+
+      // Clicking the chip toggles selection. Clicking inside the value input
+      // (once selected) only edits the value -- it must not toggle the chip off.
+      chip.addEventListener('click', (ev) => {
+        if (ev.target === valueInput) return;
+        if (chip.classList.contains('selected')) deselect(); else select();
       });
+      valueInput.addEventListener('click', (ev) => ev.stopPropagation());
+      valueInput.addEventListener('input', updateLineItemsSummary);
     });
+
+    updateLineItemsSummary();
   }
 
   function openPanel(rowNum){
@@ -692,12 +776,12 @@
       <div><div class="k">Lot #</div><div class="v">${v[COL.LOT] || '—'}</div></div>
       <div><div class="k">Customer Type</div><div class="v">${v[COL.CUSTOMER_TYPE] || '—'}</div></div>
       <div><div class="k">Week #</div><div class="v">${v[COL.WEEK] || '—'}</div></div>
-      <div><div class="k">Quoted</div><div class="v">${fmtMoney(v[COL.QUOTED])}</div></div>
       <div><div class="k">Work Order #</div><div class="v">${v[COL.WORK_ORDER] || '—'}</div></div>
       <div><div class="k">Close Date</div><div class="v">${v[COL.CLOSE_DATE] || '—'}</div></div>
     `;
 
     document.getElementById('fStatus').value = v[COL.STATUS] || '';
+    document.getElementById('fQuotedValue').value = v[COL.QUOTED] || '';
     document.getElementById('fFinalValue').value = v[COL.FINAL] || '';
     document.getElementById('fNotes').value = v[COL.NOTES] || '';
     renderLineItems(v);
@@ -720,13 +804,17 @@
       finalValue: document.getElementById('fFinalValue').value,
       notes: document.getElementById('fNotes').value
     };
+    // Estimate Value (quoted total) -- always editable now, since "Other" /
+    // custom jobs don't break down into the line items below and previously
+    // had nothing on this panel that let you update their total.
+    fields[COL.QUOTED] = document.getElementById('fQuotedValue').value;
 
-    // Collect selected line items -- unchecked items are sent as blank (cleared)
-    document.querySelectorAll('#lineItemsWrap .line-item').forEach(row => {
-      const col = row.getAttribute('data-col');
-      const checked = row.querySelector('.li-check').checked;
-      const val = row.querySelector('.li-value').value;
-      fields[col] = checked ? val : '';
+    // Collect selected line items -- deselected chips are sent as blank (cleared)
+    document.querySelectorAll('#lineItemsWrap .li-chip').forEach(chip => {
+      const col = chip.getAttribute('data-col');
+      const selected = chip.classList.contains('selected');
+      const val = chip.querySelector('.li-value').value;
+      fields[col] = selected ? val : '';
     });
 
     const msg = document.getElementById('saveMsg');
